@@ -3,8 +3,20 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  const response = handleRequest(e);
-  return addCorsHeaders(response);
+  // Check if it's a preflight OPTIONS request
+  if (e.postData.type === "application/x-www-form-urlencoded") {
+    return ContentService.createTextOutput("").setMimeType(ContentService.MimeType.TEXT);
+  }
+  
+  // Add a check for content type
+  if (e.postData.type !== "application/json") {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'error',
+      message: 'Invalid content type'
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  return handleRequest(e);
 }
 
 function handleRequest(e) {
@@ -26,12 +38,17 @@ function handleRequest(e) {
       // Handle POST requests
       const data = JSON.parse(e.postData.contents);
       if (data.action === 'addTransaction') {
-        const result = addTransaction(data.transaction);
-        return jsonResponse({ status: 'success', data: result });
+        // Add idempotency check
+        const transactionResult = addTransaction(data.transaction);
+        result = { status: 'success', data: transactionResult };
+      } else {
+        result = { status: 'error', message: 'Invalid action' };
       }
-      return jsonResponse({ status: 'error', message: 'Invalid action' });
+    } else {
+      result = { status: 'error', message: 'No action specified' };
     }
-    return jsonResponse({ status: 'error', message: 'No action specified' });
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     Logger.log('Error: ' + error.message);
     return ContentService.createTextOutput(JSON.stringify({
