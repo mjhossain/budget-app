@@ -1,0 +1,258 @@
+import React, { useState, useEffect } from 'react';
+import './App.css';
+
+const API_URL = 'https://script.google.com/macros/s/AKfycbzKJ1sUVveJl6ql_qBt3hzz2i4mTCRTacN-tVfWCujXcmKaHlbvdm52wvKODLbae1AY/exec';
+
+function App() {
+  const [transactions, setTransactions] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [newTransaction, setNewTransaction] = useState({
+    date: '',
+    amount: 0,
+    description: '',
+    category: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Fetch transactions and categories on mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const [transRes, catRes] = await Promise.all([
+        fetch(`${API_URL}?action=getTransactions`),
+        fetch(`${API_URL}?action=getCategories`)
+      ]);
+      
+      if (!transRes.ok || !catRes.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      
+      const transactionsData = await transRes.json();
+      const categoriesData = await catRes.json();
+      
+      if (transactionsData.status === 'success') {
+        setTransactions(transactionsData.data);
+      } else {
+        throw new Error(transactionsData.message || 'Failed to load transactions');
+      }
+      
+      if (categoriesData.status === 'success') {
+        setCategories(categoriesData.data);
+      } else {
+        throw new Error(categoriesData.message || 'Failed to load categories');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setNewTransaction({
+      ...newTransaction,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    if (isNaN(date)) return dateString; // Return original if invalid date
+    
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${month}/${day}/${year}`;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      // Add pre-flight check for API URL
+      if (!API_URL || !API_URL.startsWith('https://')) {
+        throw new Error('Invalid API URL configuration');
+      }
+
+      // Add request timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      // Format the date before sending
+      const dateObj = new Date(newTransaction.date);
+      if (isNaN(dateObj)) {
+        throw new TypeError('Invalid date format');
+      }
+      
+      const formattedDate = formatDate(newTransaction.date);
+      
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'addTransaction',
+          transaction: {
+            date: formattedDate,
+            amount: Number(newTransaction.amount),
+            description: String(newTransaction.description),
+            category: String(newTransaction.category)
+          }
+        }),
+        signal: controller.signal
+      });
+
+      // Add logging of the request payload
+      console.log('Sending transaction data:', {
+        ...newTransaction,
+        date: formattedDate
+      });
+
+      clearTimeout(timeoutId);
+
+      // Check response status
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Check if the response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new TypeError(`Invalid response format: ${text.substring(0, 100)}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        setNewTransaction({
+          date: '',
+          amount: 0,
+          description: '',
+          category: ''
+        });
+        await fetchData();
+      } else {
+        throw new Error(result.message || 'Failed to add transaction');
+      }
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      
+      let errorMessage = 'Failed to add transaction: ';
+      if (error instanceof TypeError) {
+        errorMessage += `Data validation error - ${error.message}`;
+      } else if (error.name === 'AbortError') {
+        errorMessage += 'Request timed out';
+      } else if (error.message.includes('Failed to fetch')) {
+        errorMessage += 'Network error - check your internet connection and API URL';
+      } else {
+        errorMessage += error.message;
+      }
+      
+      setError(errorMessage);
+      
+      // Enhanced debugging information
+      console.log('Transaction data:', newTransaction);
+      console.log('API URL:', API_URL);
+      console.log('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="app-container">
+      <h1>Transaction Manager</h1>
+      
+      {error && <div className="error-message">{error}</div>}
+      {loading && <div className="loading">Loading...</div>}
+      
+      {/* Transaction Form */}
+      <form onSubmit={handleSubmit} className="transaction-form">
+        <input
+          type="date"
+          name="date"
+          value={newTransaction.date}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="number"
+          name="amount"
+          value={newTransaction.amount}
+          onChange={handleInputChange}
+          placeholder="Amount"
+          required
+        />
+        <input
+          type="text"
+          name="description"
+          value={newTransaction.description}
+          onChange={handleInputChange}
+          placeholder="Description"
+          required
+        />
+        <select
+          name="category"
+          value={newTransaction.category}
+          onChange={handleInputChange}
+          required
+        >
+          <option value="">Select Category</option>
+          {categories.map((cat, index) => (
+            <option key={index} value={cat}>{cat}</option>
+          ))}
+        </select>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Adding...' : 'Add Transaction'}
+        </button>
+      </form>
+
+      {/* Transactions List */}
+      <div className="transactions-list">
+        <h2>Transactions</h2>
+        {transactions.length > 0 ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((transaction, index) => (
+                <tr key={index}>
+                  <td>{formatDate(transaction.date)}</td>
+                  <td>{transaction.amount}</td>
+                  <td>{transaction.description}</td>
+                  <td>{transaction.category}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No transactions found</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
