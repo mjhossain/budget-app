@@ -1,57 +1,62 @@
 function doGet(e) {
-  const response = handleRequest(e);
-  return addCorsHeaders(response);
+  return handleRequest(e);
 }
 
 function doPost(e) {
-  const response = handleRequest(e);
-  return addCorsHeaders(response);
+  // Check if it's a preflight OPTIONS request
+  if (e.postData.type === "application/x-www-form-urlencoded") {
+    return ContentService.createTextOutput("").setMimeType(ContentService.MimeType.TEXT);
+  }
+  
+  // Add a check for content type
+  if (e.postData.type !== "application/json") {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'error',
+      message: 'Invalid content type'
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  return handleRequest(e);
 }
 
 function handleRequest(e) {
   try {
+    let result;
     if (e.parameter.action) {
       // Handle GET requests
       switch (e.parameter.action) {
         case 'getCategories':
-          return jsonResponse({ status: 'success', data: getCategories() });
+          result = { status: 'success', data: getCategories() };
+          break;
         case 'getTransactions':
-          return jsonResponse({ status: 'success', data: getTransactions() });
+          result = { status: 'success', data: getTransactions() };
+          break;
         default:
-          return jsonResponse({ status: 'error', message: 'Invalid action' });
+          result = { status: 'error', message: 'Invalid action' };
       }
     } else if (e.postData) {
       // Handle POST requests
       const data = JSON.parse(e.postData.contents);
       if (data.action === 'addTransaction') {
-        const result = addTransaction(data.transaction);
-        return jsonResponse({ status: 'success', data: result });
+        // Add idempotency check
+        const transactionResult = addTransaction(data.transaction);
+        result = { status: 'success', data: transactionResult };
+      } else {
+        result = { status: 'error', message: 'Invalid action' };
       }
-      return jsonResponse({ status: 'error', message: 'Invalid action' });
+    } else {
+      result = { status: 'error', message: 'No action specified' };
     }
-    return jsonResponse({ status: 'error', message: 'No action specified' });
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     Logger.log('Error: ' + error.message);
-    return jsonResponse({
+    return ContentService.createTextOutput(JSON.stringify({
       status: 'error',
       message: error.message
-    });
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-function addCorsHeaders(response) {
-  // Add CORS headers to allow requests from any origin
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
-  };
-  
-  Object.keys(headers).forEach(key => {
-    response.setHeader(key, headers[key]);
-  });
-  
-  return response;
 }
 
 function getTransactions() {
@@ -80,13 +85,13 @@ function addTransaction(transaction) {
 
   const amount = transaction.amount || 0;
   const description = transaction.description || 'No Description';
-  const category = transaction.category || 'Uncategorized';
+  const category = transaction.category || 'Other';
 
   // Find the next empty row in column B (starting from row 5)
-  let nextRow = 5; // Start from row 5
+  let nextRow = 5;
   const lastRow = sheet.getLastRow();
   for (let i = 5; i <= lastRow; i++) {
-    if (!sheet.getRange(i, 2).getValue()) { // Check if column B is empty
+    if (!sheet.getRange(i, 2).getValue()) {
       nextRow = i;
       break;
     }
@@ -103,7 +108,7 @@ function addTransaction(transaction) {
     ]]);
 
     // Format the date in column B
-    sheet.getRange(nextRow, 2).setNumberFormat('M/d/yy');
+    sheet.getRange(nextRow, 2).setNumberFormat('MM/dd/yyyy');
 
     return { message: 'Transaction added successfully', row: nextRow };
   } catch (error) {
@@ -123,10 +128,3 @@ function getCategories() {
 function formatDate(date) {
   return Utilities.formatDate(new Date(date), Session.getScriptTimeZone(), 'M/d/yy');
 }
-
-function jsonResponse(response) {
-  return ContentService
-    .createTextOutput(JSON.stringify(response))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-  
