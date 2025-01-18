@@ -3,7 +3,8 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  return handleRequest(e);
+  const response = handleRequest(e);
+  return addCorsHeaders(response);
 }
 
 function handleRequest(e) {
@@ -25,16 +26,12 @@ function handleRequest(e) {
       // Handle POST requests
       const data = JSON.parse(e.postData.contents);
       if (data.action === 'addTransaction') {
-        const transactionResult = addTransaction(data.transaction);
-        result = { status: 'success', data: transactionResult };
-      } else {
-        result = { status: 'error', message: 'Invalid action' };
+        const result = addTransaction(data.transaction);
+        return jsonResponse({ status: 'success', data: result });
       }
-    } else {
-      result = { status: 'error', message: 'No action specified' };
+      return jsonResponse({ status: 'error', message: 'Invalid action' });
     }
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
+    return jsonResponse({ status: 'error', message: 'No action specified' });
   } catch (error) {
     Logger.log('Error: ' + error.message);
     return ContentService.createTextOutput(JSON.stringify({
