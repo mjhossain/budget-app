@@ -1,30 +1,32 @@
 export function TransactionForm({ formData, categories, status, loading, handleInputChange, handleSubmit }) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Add Transaction</h2>
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+      <h2 className="text-xl font-bold text-gray-800 mb-6">Add Transaction</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Date</label>
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded-md"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Amount</label>
-          <input
-            type="number"
-            name="amount"
-            value={formData.amount}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded-md"
-            placeholder="0.00"
-            required
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Date</label>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Amount</label>
+            <input
+              type="number"
+              name="amount"
+              value={formData.amount}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              placeholder="0.00"
+              required
+            />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>
@@ -33,7 +35,7 @@ export function TransactionForm({ formData, categories, status, loading, handleI
             name="description"
             value={formData.description}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
             placeholder="Enter description"
             required
           />
@@ -44,7 +46,7 @@ export function TransactionForm({ formData, categories, status, loading, handleI
             name="category"
             value={formData.category}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
             required
           >
             <option value="">Select category</option>
@@ -67,11 +69,11 @@ export function TransactionForm({ formData, categories, status, loading, handleI
         <button
           type="submit"
           disabled={loading}
-          className={`w-full p-2 text-white rounded-md ${
+          className={`w-full p-3 text-white rounded-lg ${
             loading 
               ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-blue-600 hover:bg-blue-700'
-          }`}
+              : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+          } transition-all duration-200`}
         >
           {loading ? 'Adding...' : 'Add Transaction'}
         </button>
