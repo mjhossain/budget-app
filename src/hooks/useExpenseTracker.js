@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import Cookies from 'js-cookie';
 
+
+// v2.1.1 on apps-script
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMIODq2ejhyHCzPbEYcZVU2q8COHVntIhr0RVfZTEKc-utGFos4NTMhGP0bZRQmS96/exec';
 
 export function useExpenseTracker() {
