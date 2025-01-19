@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 // Replace this with your Google Apps Script deployment URL
-const SCRIPT_URL = '';
+// const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhjwvAMEBcsDU2CVFJv1DMezOjd2DTvqMxoSWwg_d8lVt7EUuH1j5IoHQ95D39EFsq/exec';
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlGzkqBZb40boOKQObAtFRwV5nvGUxZmAIsVzdEMRf3Pu8425bgH5c_mYNi8ms-OorKQ/exec';
+
 
 const TransactionForm = () => {
   const [formData, setFormData] = useState({

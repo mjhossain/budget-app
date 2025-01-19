@@ -2,8 +2,11 @@ import { useState, useEffect, useMemo } from 'react';
 import Cookies from 'js-cookie';
 
 
-// v2.1.1 on apps-script
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMIODq2ejhyHCzPbEYcZVU2q8COHVntIhr0RVfZTEKc-utGFos4NTMhGP0bZRQmS96/exec';
+// working
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhjwvAMEBcsDU2CVFJv1DMezOjd2DTvqMxoSWwg_d8lVt7EUuH1j5IoHQ95D39EFsq/exec';
+
+// const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlGzkqBZb40boOKQObAtFRwV5nvGUxZmAIsVzdEMRf3Pu8425bgH5c_mYNi8ms-OorKQ/exec';
+
 
 export function useExpenseTracker() {
   const [formData, setFormData] = useState({
@@ -41,7 +44,7 @@ export function useExpenseTracker() {
   const fetchCategories = async () => {
     try {
       console.log('Fetching categories...');
-      const response = await fetch(`${SCRIPT_URL}?action=getCategories&sheetId=${sheetId}`);
+      const response = await fetch(`${SCRIPT_URL}?action=getCategories`);
       const result = await response.json();
       console.log('Categories response:', result);
       if (result.status === 'success') {
