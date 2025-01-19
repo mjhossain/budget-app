@@ -103,6 +103,7 @@ export function useExpenseTracker() {
 
       const result = await response.json();
 
+      console.log('Result:', result);
       if (result.status === 'success') {
         setStatus({
           type: 'success',
@@ -116,7 +117,7 @@ export function useExpenseTracker() {
         }));
         fetchTransactions();
       } else {
-        throw new Error(result.message);
+        throw new Error('Error Report: ' +result.message);
       }
     } catch (error) {
       setStatus({
