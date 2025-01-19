@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Cookies from 'js-cookie';
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMIODq2ejhyHCzPbEYcZVU2q8COHVntIhr0RVfZTEKc-utGFos4NTMhGP0bZRQmS96/exec';
@@ -16,6 +16,8 @@ export function useExpenseTracker() {
   const [loading, setLoading] = useState(false);
   const [sheetId, setSheetId] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     console.log('Initialization check:', { isInitialized, sheetId });
@@ -146,6 +148,14 @@ export function useExpenseTracker() {
     });
   };
 
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return transactions.slice(startIndex, endIndex);
+  }, [transactions, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(transactions.length / itemsPerPage);
+
   return {
     formData,
     categories,
@@ -158,6 +168,11 @@ export function useExpenseTracker() {
     handleInputChange,
     handleSubmit,
     handleInitialize,
-    resetApp
+    resetApp,
+    paginatedTransactions,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    itemsPerPage
   };
 } 

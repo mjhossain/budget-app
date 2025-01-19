@@ -17,7 +17,11 @@ function App() {
     handleInputChange,
     handleSubmit,
     handleInitialize,
-    resetApp
+    resetApp,
+    paginatedTransactions,
+    currentPage,
+    setCurrentPage,
+    totalPages
   } = useExpenseTracker();
 
   const [showChangeSheet, setShowChangeSheet] = useState(false);
@@ -64,7 +68,13 @@ function App() {
 
           {/* Right Column - Transactions */}
           <div className="lg:col-span-2">
-            <TransactionList transactions={transactions} />
+            <TransactionList 
+              transactions={transactions}
+              paginatedTransactions={paginatedTransactions}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
+            />
           </div>
         </div>
       </main>
