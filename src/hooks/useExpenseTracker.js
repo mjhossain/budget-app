@@ -132,6 +132,20 @@ export function useExpenseTracker() {
     }
   };
 
+  const resetApp = () => {
+    Cookies.remove('sheetId');
+    setSheetId('');
+    setIsInitialized(false);
+    setTransactions([]);
+    setCategories([]);
+    setFormData({
+      date: new Date().toISOString().split('T')[0],
+      amount: '',
+      description: '',
+      category: ''
+    });
+  };
+
   return {
     formData,
     categories,
@@ -143,6 +157,7 @@ export function useExpenseTracker() {
     setSheetId,
     handleInputChange,
     handleSubmit,
-    handleInitialize
+    handleInitialize,
+    resetApp
   };
 } 
