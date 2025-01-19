@@ -21,32 +21,37 @@ function doPost(e) {
 
 function handleRequest(e) {
   try {
+    const sheetId = e.parameter.sheetId || e.postData?.sheetId;
+    if (!sheetId) {
+      throw new Error('Sheet ID is required');
+    }
+
     let result;
     if (e.parameter.action) {
-      // Handle GET requests
       switch (e.parameter.action) {
         case 'getCategories':
-          result = { status: 'success', data: getCategories() };
+          result = { status: 'success', data: getCategories(sheetId) };
           break;
         case 'getTransactions':
-          result = { status: 'success', data: getTransactions() };
+          result = { status: 'success', data: getTransactions(sheetId) };
           break;
         default:
           result = { status: 'error', message: 'Invalid action' };
       }
     } else if (e.postData) {
-      // Handle POST requests
       const data = JSON.parse(e.postData.contents);
       if (data.action === 'addTransaction') {
-        // Add idempotency check
-        const transactionResult = addTransaction(data.transaction);
-        result = { status: 'success', data: transactionResult };
+        result = { 
+          status: 'success', 
+          data: addTransaction(sheetId, data.transaction) 
+        };
       } else {
         result = { status: 'error', message: 'Invalid action' };
       }
     } else {
       result = { status: 'error', message: 'No action specified' };
     }
+    
     return ContentService.createTextOutput(JSON.stringify(result))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
@@ -59,8 +64,9 @@ function handleRequest(e) {
   }
 }
 
-function getTransactions() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Transactions');
+function getTransactions(sheetId) {
+  const spreadsheet = getSheetById(sheetId);
+  const sheet = spreadsheet.getSheetByName('Transactions');
   const data = sheet.getRange('B5:E' + sheet.getLastRow()).getValues();
 
   return data
@@ -73,8 +79,9 @@ function getTransactions() {
     }));
 }
 
-function addTransaction(transaction) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Transactions');
+function addTransaction(sheetId, transaction) {
+  const spreadsheet = getSheetById(sheetId);
+  const sheet = spreadsheet.getSheetByName('Transactions');
 
   // Log incoming transaction for debugging
   Logger.log('Transaction data: ' + JSON.stringify(transaction));
@@ -116,8 +123,9 @@ function addTransaction(transaction) {
   }
 }
 
-function getCategories() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Summary');
+function getCategories(sheetId) {
+  const spreadsheet = getSheetById(sheetId);
+  const sheet = spreadsheet.getSheetByName('Summary');
   const range = sheet.getRange('B28:B100').getValues();
 
   return range
@@ -127,4 +135,12 @@ function getCategories() {
 
 function formatDate(date) {
   return Utilities.formatDate(new Date(date), Session.getScriptTimeZone(), 'M/d/yy');
+}
+
+function getSheetById(sheetId) {
+  try {
+    return SpreadsheetApp.openById(sheetId);
+  } catch (error) {
+    throw new Error('Invalid Sheet ID or insufficient permissions');
+  }
 }

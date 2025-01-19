@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 
 // Replace this with your Google Apps Script deployment URL
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhjwvAMEBcsDU2CVFJv1DMezOjd2DTvqMxoSWwg_d8lVt7EUuH1j5IoHQ95D39EFsq/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVfJB_17JukQaD0rBKZsWeYcW6OyOCv1DNhiLGS8sx_QTHfRT9fZxs5BpcIUV2dwyj/exec';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -14,15 +15,28 @@ function App() {
   const [transactions, setTransactions] = useState([]);
   const [status, setStatus] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(false);
+  const [sheetId, setSheetId] = useState('');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    fetchCategories();
-    fetchTransactions();
+    if (isInitialized && sheetId) {
+      fetchCategories();
+      fetchTransactions();
+    }
+  }, [isInitialized, sheetId]);
+
+  // Load sheet ID from cookie on mount
+  useEffect(() => {
+    const savedSheetId = Cookies.get('sheetId');
+    if (savedSheetId) {
+      setSheetId(savedSheetId);
+      setIsInitialized(true);
+    }
   }, []);
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${SCRIPT_URL}?action=getCategories`);
+      const response = await fetch(`${SCRIPT_URL}?action=getCategories&sheetId=${sheetId}`);
       const result = await response.json();
       if (result.status === 'success') {
         setCategories(result.data);
@@ -37,7 +51,7 @@ function App() {
 
   const fetchTransactions = async () => {
     try {
-      const response = await fetch(`${SCRIPT_URL}?action=getTransactions`);
+      const response = await fetch(`${SCRIPT_URL}?action=getTransactions&sheetId=${sheetId}`);
       const result = await response.json();
       if (result.status === 'success') {
         setTransactions(result.data);
@@ -68,6 +82,7 @@ function App() {
         method: 'POST',
         body: JSON.stringify({
           action: 'addTransaction',
+          sheetId: sheetId,
           transaction: formData
         })
       });
@@ -100,6 +115,48 @@ function App() {
       setLoading(false);
     }
   };
+
+  const handleInitialize = (e) => {
+    e.preventDefault();
+    if (sheetId) {
+      Cookies.set('sheetId', sheetId, { expires: 365 }); // Save for 1 year
+      setIsInitialized(true);
+    }
+  };
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+          <h1 className="text-2xl font-bold mb-6">Welcome to Expense Tracker</h1>
+          <form onSubmit={handleInitialize} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Enter Google Sheet ID:
+              </label>
+              <input
+                type="text"
+                value={sheetId}
+                onChange={(e) => setSheetId(e.target.value)}
+                className="w-full p-2 border rounded-md"
+                placeholder="e.g. 1A2B3C4D..."
+                required
+              />
+              <p className="text-sm text-gray-600 mt-2">
+                You can find this in your Google Sheet URL
+              </p>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700"
+            >
+              Continue
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
