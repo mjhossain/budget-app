@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 // working
 // const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhjwvAMEBcsDU2CVFJv1DMezOjd2DTvqMxoSWwg_d8lVt7EUuH1j5IoHQ95D39EFsq/exec';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXh4bM9PA7-mKkKXEkaanwXpSOKXbffSVpUYxG6aaZMYxCfo3Wf5FPGA-JLBC6kbou/exec';
+// const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXh4bM9PA7-mKkKXEkaanwXpSOKXbffSVpUYxG6aaZMYxCfo3Wf5FPGA-JLBC6kbou/exec';
 
 
 export function useExpenseTracker() {
@@ -20,31 +20,39 @@ export function useExpenseTracker() {
   const [status, setStatus] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [sheetId, setSheetId] = useState('');
+  const [scriptUrl, setScriptUrl] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
   useEffect(() => {
-    console.log('Initialization check:', { isInitialized, sheetId });
-    if (isInitialized && sheetId) {
-      console.log('Fetching data for sheet:', sheetId);
+    const savedSheetId = Cookies.get('sheetId');
+    const savedScriptUrl = Cookies.get('scriptUrl');
+    
+    // Only set as initialized if BOTH values exist
+    if (savedSheetId && savedScriptUrl) {
+      setSheetId(savedSheetId);
+      setScriptUrl(savedScriptUrl);
+      setIsInitialized(true);
+    } else {
+      // If either is missing, clear both and show initialization form
+      Cookies.remove('sheetId');
+      Cookies.remove('scriptUrl');
+      setIsInitialized(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isInitialized && sheetId && scriptUrl) {
       fetchCategories();
       fetchTransactions();
     }
-  }, [isInitialized, sheetId]);
-
-  useEffect(() => {
-    const savedSheetId = Cookies.get('sheetId');
-    if (savedSheetId) {
-      setSheetId(savedSheetId);
-      setIsInitialized(true);
-    }
-  }, []);
+  }, [isInitialized, sheetId, scriptUrl]);
 
   const fetchCategories = async () => {
     try {
       console.log('Fetching categories...');
-      const response = await fetch(`${SCRIPT_URL}?sheetId=${sheetId}&action=getCategories`);
+      const response = await fetch(`${scriptUrl}?sheetId=${sheetId}&action=getCategories`);
       const result = await response.json();
       console.log('Categories response:', result);
       if (result.success) {
@@ -64,7 +72,7 @@ export function useExpenseTracker() {
   const fetchTransactions = async () => {
     try {
       console.log('Fetching transactions...');
-      const response = await fetch(`${SCRIPT_URL}?sheetId=${sheetId}&action=getTransactions`);
+      const response = await fetch(`${scriptUrl}?sheetId=${sheetId}&action=getTransactions`);
       const result = await response.json();
       console.log('Transactions response:', result);
       if (result.success) {
@@ -95,8 +103,7 @@ export function useExpenseTracker() {
     setStatus({ type: '', message: '' });
   
     try {
-      // Build URL with parameters
-      const url = new URL(SCRIPT_URL);
+      const url = new URL(scriptUrl);
       url.searchParams.append('sheetId', sheetId);
       url.searchParams.append('date', formData.date);
       url.searchParams.append('amount', formData.amount);
@@ -134,17 +141,24 @@ export function useExpenseTracker() {
     }
   };
 
-  const handleInitialize = (e) => {
-    e.preventDefault();
-    if (sheetId) {
-      Cookies.set('sheetId', sheetId, { expires: 365 });
+  const handleInitialize = (data) => {
+    if (data.sheetId && data.scriptUrl) {
+      Cookies.set('sheetId', data.sheetId, { expires: 365 });
+      Cookies.set('scriptUrl', data.scriptUrl, { expires: 365 });
       setIsInitialized(true);
+    } else {
+      setStatus({
+        type: 'error',
+        message: 'Both Sheet ID and Script URL are required'
+      });
     }
   };
 
   const resetApp = () => {
     Cookies.remove('sheetId');
+    Cookies.remove('scriptUrl');
     setSheetId('');
+    setScriptUrl('');
     setIsInitialized(false);
     setTransactions([]);
     setCategories([]);
@@ -171,6 +185,8 @@ export function useExpenseTracker() {
     status,
     loading,
     sheetId,
+    scriptUrl,
+    setScriptUrl,
     isInitialized,
     setSheetId,
     handleInputChange,

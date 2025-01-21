@@ -12,8 +12,10 @@ function App() {
     status,
     loading,
     sheetId,
+    scriptUrl,
     isInitialized,
     setSheetId,
+    setScriptUrl,
     handleInputChange,
     handleSubmit,
     handleInitialize,
@@ -30,11 +32,8 @@ function App() {
     return <InitializeForm 
       sheetId={sheetId} 
       setSheetId={setSheetId} 
-      handleInitialize={(e) => {
-        if (e && e.preventDefault) e.preventDefault();
-        handleInitialize(e);
-        setShowChangeSheet(false);
-      }}
+      setScriptUrl={setScriptUrl}
+      handleInitialize={handleInitialize}
     />;
   }
 
