@@ -3,9 +3,9 @@ import Cookies from 'js-cookie';
 
 
 // working
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhjwvAMEBcsDU2CVFJv1DMezOjd2DTvqMxoSWwg_d8lVt7EUuH1j5IoHQ95D39EFsq/exec';
+// const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhjwvAMEBcsDU2CVFJv1DMezOjd2DTvqMxoSWwg_d8lVt7EUuH1j5IoHQ95D39EFsq/exec';
 
-// const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlGzkqBZb40boOKQObAtFRwV5nvGUxZmAIsVzdEMRf3Pu8425bgH5c_mYNi8ms-OorKQ/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJmP1WaMnVVvpvOfNQ99ZoUZMwcHsShFTo0H8-GqDlu7K367ZVqezMV1iM3VB7oJCJzQ/exec';
 
 
 export function useExpenseTracker() {
@@ -44,11 +44,11 @@ export function useExpenseTracker() {
   const fetchCategories = async () => {
     try {
       console.log('Fetching categories...');
-      const response = await fetch(`${SCRIPT_URL}?action=getCategories`);
+      const response = await fetch(`${SCRIPT_URL}?sheetId=${sheetId}&action=getCategories`);
       const result = await response.json();
       console.log('Categories response:', result);
-      if (result.status === 'success') {
-        setCategories(result.data);
+      if (result.success) {
+        setCategories(result.categories);
       } else {
         throw new Error(result.message || 'Failed to fetch categories');
       }
@@ -64,11 +64,11 @@ export function useExpenseTracker() {
   const fetchTransactions = async () => {
     try {
       console.log('Fetching transactions...');
-      const response = await fetch(`${SCRIPT_URL}?action=getTransactions&sheetId=${sheetId}`);
+      const response = await fetch(`${SCRIPT_URL}?sheetId=${sheetId}&action=getTransactions`);
       const result = await response.json();
       console.log('Transactions response:', result);
-      if (result.status === 'success') {
-        setTransactions(result.data);
+      if (result.success) {
+        setTransactions(result.transactions);
       } else {
         throw new Error(result.message || 'Failed to fetch transactions');
       }
