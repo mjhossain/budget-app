@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 // working
 // const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhjwvAMEBcsDU2CVFJv1DMezOjd2DTvqMxoSWwg_d8lVt7EUuH1j5IoHQ95D39EFsq/exec';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-mjkAYAmiAf1NVXVj7nepj_A47V8x9aAax2BIWRle6QYlPEhLq6-_fyh2bKWJwm7dew/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXh4bM9PA7-mKkKXEkaanwXpSOKXbffSVpUYxG6aaZMYxCfo3Wf5FPGA-JLBC6kbou/exec';
 
 
 export function useExpenseTracker() {
@@ -68,7 +68,7 @@ export function useExpenseTracker() {
       const result = await response.json();
       console.log('Transactions response:', result);
       if (result.success) {
-        setTransactions(result.transactions);
+        setTransactions(result.transactions.reverse());
       } else {
         throw new Error(result.message || 'Failed to fetch transactions');
       }
