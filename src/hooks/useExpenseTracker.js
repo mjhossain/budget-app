@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 // working
 // const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhjwvAMEBcsDU2CVFJv1DMezOjd2DTvqMxoSWwg_d8lVt7EUuH1j5IoHQ95D39EFsq/exec';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJmP1WaMnVVvpvOfNQ99ZoUZMwcHsShFTo0H8-GqDlu7K367ZVqezMV1iM3VB7oJCJzQ/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-mjkAYAmiAf1NVXVj7nepj_A47V8x9aAax2BIWRle6QYlPEhLq6-_fyh2bKWJwm7dew/exec';
 
 
 export function useExpenseTracker() {
@@ -93,21 +93,23 @@ export function useExpenseTracker() {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: '', message: '' });
-
+  
     try {
-      const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'addTransaction',
-          sheetId: sheetId,
-          transaction: formData
-        })
+      // Build URL with parameters
+      const url = new URL(SCRIPT_URL);
+      url.searchParams.append('sheetId', sheetId);
+      url.searchParams.append('date', formData.date);
+      url.searchParams.append('amount', formData.amount);
+      url.searchParams.append('description', formData.description);
+      url.searchParams.append('category', formData.category);
+  
+      const response = await fetch(url, {
+        method: 'POST'
       });
-
+  
       const result = await response.json();
-
-      console.log('Result:', result);
-      if (result.status === 'success') {
+  
+      if (result.success) {
         setStatus({
           type: 'success',
           message: 'Transaction added successfully!'
@@ -120,7 +122,7 @@ export function useExpenseTracker() {
         }));
         fetchTransactions();
       } else {
-        throw new Error('Error Report: ' +result.message);
+        throw new Error(result.error || 'Failed to add transaction');
       }
     } catch (error) {
       setStatus({

@@ -183,22 +183,37 @@ function getTransactions(sheetId) {
 }
 
 function addTransaction(sheetId, data) {
-  if (!data.date || !data.amount || !data.description || !data.category) {
-    throw new Error('Missing required transaction data');
+  try {
+    // Input validation
+    if (!data.date || !data.amount || !data.description || !data.category) {
+      throw new Error('Missing required transaction data');
+    }
+    
+    // Get the sheet
+    const sheet = SpreadsheetApp.openById(sheetId).getSheetByName('Transactions');
+    const lastRow = sheet.getLastRow();
+    
+    // Format the date to MM/dd/yyyy
+    const dateObj = new Date(data.date);
+    const formattedDate = Utilities.formatDate(dateObj, Session.getScriptTimeZone(), 'MM/dd/yyyy');
+    
+    // Add the new transaction starting from column B (2)
+    sheet.getRange(lastRow + 1, 2, 1, 4).setValues([[
+      formattedDate,             // Column B - Date
+      parseFloat(data.amount),   // Column C - Amount
+      data.description,          // Column D - Description
+      data.category             // Column E - Category
+    ]]);
+    
+    return {
+      success: true,
+      message: 'Transaction added successfully'
+    };
+  } catch (error) {
+    console.error('Error in addTransaction:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
-  
-  const sheet = SpreadsheetApp.openById(sheetId).getSheetByName('Transactions');
-  const lastRow = sheet.getLastRow();
-  
-  sheet.getRange(lastRow + 1, 1, 1, 4).setValues([[
-    new Date(data.date),
-    parseFloat(data.amount),
-    data.description,
-    data.category
-  ]]);
-  
-  return {
-    success: true,
-    message: 'Transaction added successfully'
-  };
 }
