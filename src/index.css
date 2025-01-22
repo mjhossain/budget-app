@@ -7,6 +7,7 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow: auto;
+  background-color: #f8fafc; /* Off-white background */
 }
 
 :root {
@@ -35,9 +36,11 @@ a:hover {
 
 body {
   display: flex;
-  place-items: center;
+  justify-content: center;
+  align-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #f8fafc; /* Ensure body has same off-white color */
 }
 
 h1 {
