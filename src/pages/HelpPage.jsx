@@ -241,15 +241,28 @@ function addTransaction(sheetId, data) {
           </h1>
           
           <div className="space-y-8 w-full">
+
             {/* Step 1 */}
+            <div className="bg-gray-50 p-6 rounded-lg w-full">
+              <h2 className="text-xl font-semibold mb-4 text-gray-700">
+                1. Create a default Monthly Budget Google Sheet
+              </h2>
+              <p className='text-gray-600 pl-4'>The very first thing you need to do is create a default Monthly Budget Google Sheet. This will be used to store your monthly budget and transactions.</p>
+              <p className='text-gray-600 pl-4 mb-5'>Make a Copy of this Google Sheet and save it under your Google Drive.</p>
+              <a href="https://docs.google.com/spreadsheets/d/1HSPtzs-DabzaabgkH_CnUNQbUd3N1ZdcASG3ihVQnb4/edit?usp=sharing" target="_blank" className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded">Monthly Budget Google Sheet</a>
+            </div>
+
+
+            {/* Step 2 */}
             <div className="bg-gray-50 p-6 rounded-lg w-full relative">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                1. Create Google Apps Script
+                2. Create Google Apps Script
               </h2>
               <ol className="list-decimal list-inside space-y-2 text-gray-600 pl-4">
                 <li>Open your Google Sheet</li>
                 <li>Go to Extensions → Apps Script</li>
-                <li>Delete any existing code and paste the following:</li>
+                <li>Use the COPY button on the top-right corner to copy the code below</li>
+                <li>Delete any existing code and paste the copied code:</li>
               </ol>
               <div className="relative">
                 <pre className="mt-4 p-4 bg-gray-100 rounded-lg overflow-x-auto text-sm text-gray-700 w-full">
@@ -285,17 +298,17 @@ Click on the COPY button to copy the full code to your clipboard :) `}
                 </pre>
                 <button
                   onClick={handleCopy}
-                  className="absolute top-2 right-2 p-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm transition-colors text-gray-700"
+                  className="absolute top-2 right-2 p-2 bg-blue-500 hover:bg-gray-200 hover:text-gray-700 rounded-lg text-md transition-colors text-gray-100"
                 >
                   {copied ? '✅ Copied!' : '📋 Copy'}
                 </button>
               </div>
             </div>
 
-            {/* Step 2 */}
+            {/* Step 3 */}
             <div className="bg-gray-50 p-6 rounded-lg w-full">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                2. Deploy as Web App
+                3. Deploy as Web App
               </h2>
               <ol className="list-decimal list-inside space-y-2 text-gray-600 pl-4">
                 <li>Click "Deploy" → "New deployment"</li>
@@ -307,10 +320,10 @@ Click on the COPY button to copy the full code to your clipboard :) `}
               </ol>
             </div>
 
-            {/* Step 3 */}
+            {/* Step 4 */}
             <div className="bg-gray-50 p-6 rounded-lg w-full">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                3. Connect to Expense Tracker
+                4. Connect to Expense Tracker
               </h2>
               <ol className="list-decimal list-inside space-y-2 text-gray-600 pl-4">
                 <li>Open Expense Tracker</li>
@@ -321,15 +334,17 @@ Click on the COPY button to copy the full code to your clipboard :) `}
               </ol>
             </div>
 
-            {/* Notes */}
-            <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-100 w-full">
-              <h3 className="font-semibold mb-2 text-yellow-800">
-                Important Notes:
+            {/* Disclaimer */}
+            <div className="bg-red-50 p-6 rounded-lg border border-red-100 w-full">
+              <h3 className="font-semibold mb-2 text-red-800">
+                Disclaimer:
               </h3>
-              <ul className="list-disc list-inside space-y-1 text-yellow-700 pl-4">
-                <li>Your Google Sheet must have the following columns: Date, Amount, Description, Category</li>
-                <li>The first row should contain headers</li>
-                <li>Make sure your Google Sheet is shared with "Anyone with the link can view"</li>
+              <ul className="list-disc list-inside space-y-1 text-red-700 pl-4">
+                <li>This is an open-source project provided as-is without warranty</li>
+                <li>Use at your own risk - we are not responsible for any data loss or financial decisions</li>
+                <li>Always maintain backups of your Google Sheets data</li>
+                <li>Your Google Sheet ID and Script URL is only stored within your browser's local storage and is not shared with anyone</li>
+                <li>This project is not affiliated with or endorsed by Google</li>
               </ul>
             </div>
           </div>
