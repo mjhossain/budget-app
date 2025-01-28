@@ -323,14 +323,14 @@ Click on the COPY button to copy the full code to your clipboard :) `}
             {/* Step 4 */}
             <div className="bg-gray-50 p-6 rounded-lg w-full">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                4. Connect to Expense Tracker
+                4. Connect to BudgetBuddy
               </h2>
               <ol className="list-decimal list-inside space-y-2 text-gray-600 pl-4">
-                <li>Open Expense Tracker</li>
+                <li>Open BudgetBuddy</li>
                 <li>Go to Settings</li>
                 <li>Paste the Web App URL in the Script URL field</li>
                 <li>Enter your Google Sheet ID</li>
-                <li>Click Initialize</li>
+                <li>Click Open Sheet</li>
               </ol>
             </div>
 

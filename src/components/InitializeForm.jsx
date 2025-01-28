@@ -26,7 +26,7 @@ export function InitializeForm({ handleInitialize, setSheetId, setScriptUrl }) {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center px-4">
       <div className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl w-full max-w-md border border-white/20">
         <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-          Welcome to <span className="text-blue-600">Expense Tracker</span>
+          Welcome to <span className="text-blue-600">BudgetBuddy</span>
         </h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
