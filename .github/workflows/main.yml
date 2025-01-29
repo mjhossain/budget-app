@@ -1,0 +1,22 @@
+# author: mjhossain
+name: SSH and Deploy Docker 
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+        - name: Remote Build and Deploy
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.WEBSERVER_HOST }}
+            username: ${{ secrets.WEBSERVER_USERNAME }}
+            password: ${{ secrets.WEBSERVER_PASS }}
+            port: ${{ secrets.WEBSERVER_PORT }}
+            script: |
+              cd scripts
+              ./deploy-budget-app.sh
